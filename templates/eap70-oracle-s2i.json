@@ -1,0 +1,357 @@
+{
+    "kind": "Template",
+    "apiVersion": "v1",
+    "metadata": {
+        "name": "eap70-oracle-s2i",
+        "namespace": "openshift",
+        "annotations": {
+            "description": "Application template for EAP 7 applications built using S2I. Including Oracle Datasource",
+            "iconClass": "icon-jboss",
+            "tags": "eap,javaee,java,jboss,xpaas,oracle",
+            "version": "1.3.2"
+        }
+    },
+    "objects": [{
+            "apiVersion": "v1",
+            "kind": "Service",
+            "metadata": {
+                "annotations": {
+                    "description": "The web server's http port."
+                },
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}"
+            },
+            "spec": {
+                "ports": [{
+                    "port": 8080,
+                    "targetPort": 8080
+                }],
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}"
+                }
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "id": "${APPLICATION_NAME}-http",
+            "kind": "Route",
+            "metadata": {
+                "annotations": {
+                    "description": "Route for application's http service."
+                },
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}"
+            },
+            "spec": {
+                "host": "${HOSTNAME_HTTP}",
+                "to": {
+                    "name": "${APPLICATION_NAME}"
+                }
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "ImageStream",
+            "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "BuildConfig",
+            "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}"
+            },
+            "spec": {
+                "output": {
+                    "to": {
+                        "kind": "ImageStreamTag",
+                        "name": "${APPLICATION_NAME}:latest"
+                    }
+                },
+                "source": {
+                    "contextDir": "${CONTEXT_DIR}",
+                    "git": {
+                        "ref": "${SOURCE_REPOSITORY_REF}",
+                        "uri": "${SOURCE_REPOSITORY_URL}"
+                    },
+                    "type": "Git"
+                },
+                "strategy": {
+                    "sourceStrategy": {
+                        "forcePull": true,
+                        "from": {
+                            "kind": "ImageStreamTag",
+                            "name": "jboss-eap-70-oracle-s2i:latest",
+                            "namespace": "${IMAGE_STREAM_NAMESPACE}"
+                        }
+                    },
+                    "type": "Source"
+                },
+                "triggers": [{
+                        "github": {
+                            "secret": "${GITHUB_WEBHOOK_SECRET}"
+                        },
+                        "type": "GitHub"
+                    },
+                    {
+                        "generic": {
+                            "secret": "${GENERIC_WEBHOOK_SECRET}"
+                        },
+                        "type": "Generic"
+                    },
+                    {
+                        "imageChange": {},
+                        "type": "ImageChange"
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "DeploymentConfig",
+            "metadata": {
+                "labels": {
+                    "application": "${APPLICATION_NAME}"
+                },
+                "name": "${APPLICATION_NAME}"
+            },
+            "spec": {
+                "replicas": 1,
+                "selector": {
+                    "deploymentConfig": "${APPLICATION_NAME}"
+                },
+                "strategy": {
+                    "type": "Recreate"
+                },
+                "template": {
+                    "metadata": {
+                        "labels": {
+                            "application": "${APPLICATION_NAME}",
+                            "deploymentConfig": "${APPLICATION_NAME}"
+                        },
+                        "name": "${APPLICATION_NAME}"
+                    },
+                    "spec": {
+                        "containers": [{
+                            "env": [{
+                                    "name": "OPENSHIFT_KUBE_PING_LABELS",
+                                    "value": "application=${APPLICATION_NAME}"
+                                },
+                                {
+                                    "name": "OPENSHIFT_KUBE_PING_NAMESPACE",
+                                    "valueFrom": {
+                                        "fieldRef": {
+                                            "fieldPath": "metadata.namespace"
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "MQ_CLUSTER_PASSWORD",
+                                    "value": "${MQ_CLUSTER_PASSWORD}"
+                                },
+                                {
+                                    "name": "MQ_QUEUES",
+                                    "value": "${MQ_QUEUES}"
+                                },
+                                {
+                                    "name": "MQ_TOPICS",
+                                    "value": "${MQ_TOPICS}"
+                                },
+                                {
+                                    "name": "JGROUPS_CLUSTER_PASSWORD",
+                                    "value": "${JGROUPS_CLUSTER_PASSWORD}"
+                                },
+                                {
+                                    "name": "AUTO_DEPLOY_EXPLODED",
+                                    "value": "${AUTO_DEPLOY_EXPLODED}"
+                                },
+                                {
+                                    "name": "EXTERNAL_ORACLE_USERNAME",
+                                    "valueFrom": {
+                                        "secretKeyRef": {
+                                            "name": "oracle-external-service",
+                                            "key": "username"
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "EXTERNAL_ORACLE_PASSPHRASE",
+                                    "valueFrom": {
+                                        "secretKeyRef": {
+                                            "name": "oracle-external-service",
+                                            "key": "password"
+                                        }
+                                    }
+                                }
+                            ],
+                            "image": "${APPLICATION_NAME}",
+                            "imagePullPolicy": "Always",
+                            "lifecycle": {
+                                "preStop": {
+                                    "exec": {
+                                        "command": [
+                                            "/opt/eap/bin/jboss-cli.sh",
+                                            "-c",
+                                            ":shutdown(timeout=60)"
+                                        ]
+                                    }
+                                }
+                            },
+                            "livenessProbe": {
+                                "exec": {
+                                    "command": [
+                                        "/bin/bash",
+                                        "-c",
+                                        "/opt/eap/bin/livenessProbe.sh"
+                                    ]
+                                }
+                            },
+                            "name": "${APPLICATION_NAME}",
+                            "ports": [{
+                                    "containerPort": 8778,
+                                    "name": "jolokia",
+                                    "protocol": "TCP"
+                                },
+                                {
+                                    "containerPort": 8080,
+                                    "name": "http",
+                                    "protocol": "TCP"
+                                },
+                                {
+                                    "containerPort": 8888,
+                                    "name": "ping",
+                                    "protocol": "TCP"
+                                }
+                            ],
+                            "readinessProbe": {
+                                "exec": {
+                                    "command": [
+                                        "/bin/bash",
+                                        "-c",
+                                        "/opt/eap/bin/readinessProbe.sh"
+                                    ]
+                                }
+                            }
+                        }],
+                        "terminationGracePeriodSeconds": 75
+                    }
+                },
+                "triggers": [{
+                        "imageChangeParams": {
+                            "automatic": true,
+                            "containerNames": [
+                                "${APPLICATION_NAME}"
+                            ],
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "${APPLICATION_NAME}:latest"
+                            }
+                        },
+                        "type": "ImageChange"
+                    },
+                    {
+                        "type": "ConfigChange"
+                    }
+                ]
+            }
+        }
+    ],
+    "parameters": [{
+            "name": "APPLICATION_NAME",
+            "description": "The name for the application.",
+            "value": "eap-app",
+            "required": true
+        },
+        {
+            "name": "HOSTNAME_HTTP",
+            "description": "Custom hostname for http service route.  Leave blank for default hostname, e.g.: \u003capplication-name\u003e-\u003cproject\u003e.\u003cdefault-domain-suffix\u003e"
+        },
+        {
+            "name": "SOURCE_REPOSITORY_URL",
+            "description": "Git source URI for application",
+            "value": "https://github.com/jboss-developer/jboss-eap-quickstarts",
+            "required": true
+        },
+        {
+            "name": "SOURCE_REPOSITORY_REF",
+            "description": "Git branch/tag reference",
+            "value": "7.0.0.GA"
+        },
+        {
+            "name": "CONTEXT_DIR",
+            "description": "Path within Git project to build; empty for root project directory.",
+            "value": "kitchensink"
+        },
+        {
+            "name": "MQ_QUEUES",
+            "description": "Queue names"
+        },
+        {
+            "name": "MQ_TOPICS",
+            "description": "Topic names"
+        },
+        {
+            "name": "MQ_CLUSTER_PASSWORD",
+            "description": "A-MQ cluster admin password",
+            "generate": "expression",
+            "from": "[a-zA-Z0-9]{8}",
+            "required": true
+        },
+        {
+            "name": "GITHUB_WEBHOOK_SECRET",
+            "description": "GitHub trigger secret",
+            "generate": "expression",
+            "from": "[a-zA-Z0-9]{8}",
+            "required": true
+        },
+        {
+            "name": "GENERIC_WEBHOOK_SECRET",
+            "description": "Generic build trigger secret",
+            "generate": "expression",
+            "from": "[a-zA-Z0-9]{8}",
+            "required": true
+        },
+        {
+            "name": "IMAGE_STREAM_NAMESPACE",
+            "description": "Namespace in which the ImageStreams for Red Hat Middleware images are installed. These ImageStreams are normally installed in the openshift namespace. You should only need to modify this if you've installed the ImageStreams in a different namespace/project.",
+            "value": "openshift",
+            "required": true
+        },
+        {
+            "name": "JGROUPS_CLUSTER_PASSWORD",
+            "description": "JGroups cluster password",
+            "generate": "expression",
+            "from": "[a-zA-Z0-9]{8}",
+            "required": true
+        },
+        {
+            "name": "AUTO_DEPLOY_EXPLODED",
+            "description": "Controls whether exploded deployment content should be automatically deployed",
+            "value": "false"
+        },
+        {
+            "name": "EXTERNAL_ORACLE_DATABASE_NAME",
+            "description": "Defines the Oracle Database Name to connect to",
+            "value": "XE",
+            "required": true
+        }
+    ],
+    "labels": {
+        "template": "eap70-oracle-s2i",
+        "xpaas": "1.3.2"
+    }
+}
