@@ -8,4 +8,4 @@ USER root
 
 RUN chown -R jboss:jboss /opt/eap/* && find /opt/eap/standalone -type d -exec chmod 777 {} +
 
-USER jboss
+USER 185 
