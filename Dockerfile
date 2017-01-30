@@ -6,6 +6,8 @@ COPY ./resources/ /opt/eap/
 
 USER root
 
-RUN chown -R jboss:jboss /opt/eap/* && find /opt/eap/standalone -type d -exec chmod 777 {} +
+RUN chown -R jboss:jboss /opt/eap/* && \
+    find /opt/eap/standalone -type d -exec chmod 777 {} + && \
+    find /opt/eap/modules/com -type f -exec chmod 644 {} +
 
 USER 185 
