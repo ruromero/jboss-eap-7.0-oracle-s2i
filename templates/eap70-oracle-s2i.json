@@ -85,14 +85,27 @@
                         "ref": "${SOURCE_REPOSITORY_REF}",
                         "uri": "${SOURCE_REPOSITORY_URL}"
                     },
-                    "type": "Git"
+                    "type": "Git",
+                    "images": [{
+                        "from": {
+                            "kind": "ImageStreamTag",
+                            "name": "mysql-driver-addon:latest"
+                        },
+                        "paths": [{
+                            "destinationDir": "/etc/eap/modules",
+                            "sourcePath": "/addon/modules/."
+                        },{
+                            "destinationDir": "/etc/eap/standalone/configuration",
+                            "sourcePath": "/addon/configuration/."
+                        }]
+                    }]
                 },
                 "strategy": {
                     "sourceStrategy": {
                         "forcePull": true,
                         "from": {
                             "kind": "ImageStreamTag",
-                            "name": "jboss-eap-70-oracle-s2i:latest",
+                            "name": "jboss-eap70-openshift:1.4",
                             "namespace": "${IMAGE_STREAM_NAMESPACE}"
                         }
                     },
