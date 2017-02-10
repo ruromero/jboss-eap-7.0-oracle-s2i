@@ -1,14 +1,10 @@
-FROM registry.access.redhat.com/jboss-eap-7/eap70-openshift
+FROM scratch
 
 MAINTAINER Ruben Romero Montes <rromerom@redhat.com>
 
-COPY ./resources/ /opt/eap/
-ADD http://oracle-xe/files/ojdbc7.jar /opt/eap/modules/com/oracle/main/
+COPY /resources/configuration/ /addon/configuration/
+COPY /resources/modules/ /addon/modules/
+ADD http://oracle-xe/files/ojdbc7.jar /modules/com/oracle/main/
 
-USER root
+CMD ["/bin/sh"]
 
-RUN chown -R jboss:jboss /opt/eap/* && \
-    find /opt/eap/standalone -type d -exec chmod 777 {} + && \
-    find /opt/eap/modules/com -type f -exec chmod 644 {} +
-
-USER 185 
