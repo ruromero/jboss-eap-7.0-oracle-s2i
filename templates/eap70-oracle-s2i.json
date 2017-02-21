@@ -89,7 +89,7 @@
                     "images": [{
                         "from": {
                             "kind": "ImageStreamTag",
-                            "name": "mysql-driver-addon:latest"
+                            "name": "oracle-jboss-eap-addon:latest"
                         },
                         "paths": [{
                             "destinationDir": "/etc/eap/modules",
