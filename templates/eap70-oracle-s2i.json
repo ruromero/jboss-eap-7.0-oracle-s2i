@@ -92,10 +92,10 @@
                             "name": "oracle-jboss-eap-addon:latest"
                         },
                         "paths": [{
-                            "destinationDir": "/etc/eap/modules",
+                            "destinationDir": "modules",
                             "sourcePath": "/addon/modules/."
                         },{
-                            "destinationDir": "/etc/eap/standalone/configuration",
+                            "destinationDir": "standalone/configuration",
                             "sourcePath": "/addon/configuration/."
                         }]
                     }]
