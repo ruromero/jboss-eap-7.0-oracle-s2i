@@ -1,8 +1,13 @@
 {
-    "kind": "List",
+    "kind": "Template",
     "apiVersion": "v1",
-    "metadata": {},
-    "items": [{
+    "metadata": {
+        "name": "oracle-external-resources-template",
+        "annotations": {
+            "description": "Template to create the necessary resources to access an external Oracle Database"
+        }
+    },
+    "objects": [{
             "apiVersion": "v1",
             "kind": "Service",
             "metadata": {
@@ -32,7 +37,7 @@
             },
             "subsets": [{
                 "addresses": [{
-                    "ip": "192.168.55.44"
+                    "ip": "${ORACLE_IP}"
                 }],
                 "ports": [{
                     "name": "oracle",
@@ -51,10 +56,30 @@
                 "name": "oracle-external-service"
             },
             "stringData": {
-                "username": "demouser",
-                "password": "demopwd"
+                "username": "${ORACLE_USERNAME}",
+                "password": "${ORACLE_PASSWORD}"
             }
 
         }
-    ]
+    ],
+    "parameters": [{
+            "name": "ORACLE_USERNAME",
+            "description": "External Oracle DB user name",
+            "required": true
+        },
+        {
+            "name": "ORACLE_PASSWORD",
+            "description": "Extrernal Oracle DB user password",
+            "required": true
+        },
+        {
+            "name": "ORACLE_IP",
+            "description": "External Oracle DB IP",
+            "required": true
+        }
+    ],
+    "labels": {
+        "template": "oracle-s2i"
+    }
 }
+
