@@ -89,7 +89,8 @@
                     "images": [{
                         "from": {
                             "kind": "ImageStreamTag",
-                            "name": "oracle-jboss-eap-addon:latest"
+                            "name": "oracle-jboss-eap-addon:latest",
+			                      "namespace": "openshift"
                         },
                         "paths": [{
                             "destinationDir": "modules",
@@ -111,7 +112,8 @@
                     },
                     "type": "Source"
                 },
-                "triggers": [{
+                "triggers": [
+                    {
                         "github": {
                             "secret": "${GITHUB_WEBHOOK_SECRET}"
                         },
@@ -125,6 +127,16 @@
                     },
                     {
                         "imageChange": {},
+                        "type": "ImageChange"
+                    },
+                    {
+                        "imageChange": {
+                            "from": {
+                                "kind": "ImageStreamTag",
+                                "name": "oracle-jboss-eap-addon:latest",
+    			                      "namespace": "openshift"
+                            }
+                        },
                         "type": "ImageChange"
                     },
                     {
