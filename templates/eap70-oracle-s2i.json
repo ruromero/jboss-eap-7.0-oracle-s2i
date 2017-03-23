@@ -93,10 +93,10 @@
 			                      "namespace": "openshift"
                         },
                         "paths": [{
-                            "destinationDir": "modules",
+                            "destinationDir": "contrib/wfmodules",
                             "sourcePath": "/addon/modules/."
                         },{
-                            "destinationDir": "standalone/configuration",
+                            "destinationDir": "contrib/wfcfg",
                             "sourcePath": "/addon/configuration/."
                         }]
                     }]
