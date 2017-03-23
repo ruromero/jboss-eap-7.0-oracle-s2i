@@ -88,7 +88,7 @@
         <subsystem xmlns="urn:jboss:domain:logging:3.0">
             <console-handler name="CONSOLE">
                 <formatter>
-                    <named-formatter name="COLOR-PATTERN"/>
+                    <named-formatter name="OPENSHIFT"/>
                 </formatter>
             </console-handler>
             <async-handler name="ASYNC">
@@ -117,6 +117,7 @@
                 <custom-formatter module="org.jboss.logmanager.ext" class="org.jboss.logmanager.ext.formatters.LogstashFormatter">
                     <properties>
                         <property name="metaData" value="log-handler=CONSOLE"/>
+                        <property name="printDetails" value="true"/>
                     </properties>
                 </custom-formatter>
             </formatter>
