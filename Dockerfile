@@ -2,7 +2,7 @@ FROM scratch
 
 MAINTAINER Ruben Romero Montes <rromerom@redhat.com>
 
-ENV LAST_UPDATE "23-03-2017 17:24"
+ENV LAST_UPDATE "24-03-2017 10:00"
 
 COPY /configuration/ /addon/configuration/
 COPY /modules/ /addon/modules/
