@@ -221,6 +221,10 @@
                                             "key": "password"
                                         }
                                     }
+                                },
+                                {
+                                    "name": "EXTERNAL_ORACLE_DATABASE_NAME",
+                                    "value": "${EXTERNAL_ORACLE_DATABASE_NAME}"
                                 }
                             ],
                             "image": "${APPLICATION_NAME}",
