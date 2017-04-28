@@ -90,14 +90,14 @@
                         "from": {
                             "kind": "ImageStreamTag",
                             "name": "oracle-jboss-eap-addon:latest",
-			                      "namespace": "openshift"
+			    "namespace": "openshift"
                         },
                         "paths": [{
-                            "destinationDir": "contrib/wfmodules",
-                            "sourcePath": "/addon/modules/."
+                            "destinationDir": "${CONTEXT_DIR}/modules",
+                            "sourcePath": "/modules/."
                         },{
-                            "destinationDir": "contrib/wfcfg",
-                            "sourcePath": "/addon/configuration/."
+                            "destinationDir": "${CONTEXT_DIR}/configuration",
+                            "sourcePath": "/configuration/."
                         }]
                     }]
                 },
