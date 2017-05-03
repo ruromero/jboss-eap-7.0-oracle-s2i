@@ -1,4 +1,4 @@
-FROM scratch
+FROM busybox
 
 MAINTAINER Ruben Romero Montes <rromerom@redhat.com>
 
